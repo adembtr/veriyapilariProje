@@ -152,7 +152,7 @@ void queueControl::updateGrid(){
 void queueControl::printGridWithTour(int tourNum){
     system("cls"); 
     
-    cout << "=== TUR " << tourNum << " ===" << endl << endl;
+    cout <<"TUR "<<tourNum<<endl;
     
     int count = 0;
     for(int i = 0; i < rowCount; i++){
