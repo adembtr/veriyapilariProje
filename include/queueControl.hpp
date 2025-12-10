@@ -1,40 +1,43 @@
+/**
+* @file queueControl.hpp
+* @description bu sayfa altıgenleri yonetiyor.
+* @course 1A grubu ( mehmet fatih adak)
+* @assignment 2. Ödev
+* @date 07.12.2025
+* @author Adem batur , adem.batur@ogr.sakarya.edu.tr
+*/
 #ifndef QUEUECONTROL_HPP
 #define QUEUECONTROL_HPP
 
 #include "queue.hpp"
 #include <fstream>
-#include <iostream>
 #include <string>
 
-
 struct HexagonNode {
-    Queue veri;        // Bu altigenin kuyrugu (6 BST)
-    HexagonNode* next; // Sonraki altigen
-
+    Queue veri;  // kuyruk tutuyor veri olarak (max 6 agac)
+    HexagonNode* next; // siradaki altigen
     HexagonNode();
 };
-                 
 
-                                                            
-
-
-class queueControl{
+class queueControl {
 private:
-    HexagonNode* head;    // Altigen listesinin başi
-    int** grid;           // Ekran grid'i
-    int rowCount;         // Grid satir sayisi, sütün 6 zaten.
-    int totalHexagons;    // Toplam altigen sayisi
+    HexagonNode* head;
+    HexagonNode** hexArray; // altigenlere direkt erismek icin 
+    int** grid;  //ekrana basilacak sayilari tutar
+    int rowCount;
+    int totalHexagons;
+
+    void updateSingleHexagon(int index);  // Tek altıgenin degerini hesapla, burda hangi altigen oldugunu index ile veriyoruz o orda cikmak uzere olan/oncelikli ile hesapliyor
+
 public:
-    queueControl(int hexagonCount); // bu diziyi ve listeyi boş olarak oluşturur. altigen listesini tek yönlü ve dairesel olarak oluşturur.
+    queueControl(int hexagonCount); //grid dizisini ve altigenlere hizli erismemizi saglayan altigen dizisini olusturur olusturur
+    ~queueControl(); // dizileri ve tum altigenleri siler
 
-    void initializeFromFile(const std::string& dosyaAdi); //dosyadan okuyup agaclari doldurup ekrana basar
-
-    void runTours(int tourCount);    // 3. Fonksiyon "tur yapar"
-
-    void updateGrid();  // Grid degerlerini hesapla
+    void initializeFromFile(const std::string& dosyaAdi);
+    void runTours(int tourCount);
+    void updateGrid(); //Tüm altıgenlerin grid değerlerini hesaplar.
     void printGrid();
-    void printGridWithTour(int tourNum);  // turlar ile gridi doldurur
-    ~queueControl();
+    void printGridWithTour(int tourNum);
 };
 
 #endif

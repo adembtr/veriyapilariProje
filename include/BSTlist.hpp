@@ -1,37 +1,40 @@
+/**
+* @file BSTlist.hpp
+* @description bu sayfa agac dugumleri ve BST list olusturuyor
+* @course 1A grubu ( mehmet fatih adak)
+* @assignment 2. Ödev
+* @date 07.12.2025
+* @author Adem batur , adem.batur@ogr.sakarya.edu.tr
+*/
 #ifndef BST_HPP
 #define BST_HPP
-#include <cstddef>  // NULL için
+#include <cstddef>
 
-struct NodeTree{
+struct NodeTree {
     int data;
     NodeTree* right;
     NodeTree* left;
-
-    NodeTree(const int& dt = 0 , NodeTree* rg = NULL , NodeTree* lf = NULL);
+    NodeTree(const int& dt = 0, NodeTree* rg = NULL, NodeTree* lf = NULL);
 };
 
-class BST{
+class BST {
 private:
     NodeTree* root;
-    void SearchAndAdd(NodeTree*& subNode, const int& item);
+    int nodeCount;       // Önbelleklenmiş node sayısı
+    void SearchAndAdd(NodeTree*& subNode, const int& item); // ekle
+    int calculateHeight(NodeTree* hNode);          // height hesapla
+    void postorderCollect(NodeTree* node, int* arr, int& index); // postorder topla
+    void deleteTree(NodeTree*& node);  // agaci sil
+    int Height(NodeTree* hNode) ; 
 
-    int Height(NodeTree* hNode);  //agacin yuksekligini donuyor
-
-    //agaci silmek icin gereken fonklar
-    void postorderCollect(NodeTree* node, int* arr, int& index); 
-    void deleteTree(NodeTree*& node);
-
-    //agacin node sayisini hesapiyor ve diziyi buna göre belirliyor.
-    int countNodes(NodeTree* node); 
 public:
     BST();
     ~BST();
-    void add(const int item);
-    int getHeight();
-    int getNodeCount();
-
-    // postorder bi sekile agaci alip diziye dolduruyor ve agaci siliyor
-    int* postorderGetAndDelete(int* arr, int& size);
-    int getRoot();
+    void add(const int item); // ekle
+    int getHeight();       // height geiir
+    int getNodeCount();    // dugumleri hesapla ve getir
+    int* postorderGetAndDelete(int* arr, int& size); // postorder gez ve diziye topla ve sil 
+    int getRoot();    //koku getir
 };
+
 #endif

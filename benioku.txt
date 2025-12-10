@@ -1,0 +1,12 @@
+******* ÖNEMLİ *******
+hocam sizin verdiğiniz ödev dökümanında 
+26 18 44 7 19 63   73 37 5 21 10 68   6 41 47 54 50 74
+
+bu şekilde tek yönlü bir altıgen listesi var ve her altıgenden ağaç çıkartılıp BİR SAĞDAKİ  ağaca dağıtılıyor. yani 63 73 e 68 ise 6 ya bu şekilde ama siz ekrana yazdırırken
+
+26 18 44 7 19 63
+68 10 21 5 37 73  --> ters
+6 41 47 54 50 74
+bu şekilde yazdırmışsınız yani bir yılan gibi 63 ün altıgenindeki ağacı çıkartıp 73 e dağıtıyorsunuz. 68 dekini alıp 6 ya dağıtıyorsunuz bende ödevi buna göre hazırladım.
+
+lütfen çıktıları karşılaştırırken bunları da göz önünde bulundurursanız memnun olurum hocam , saygılarımla adem batur..

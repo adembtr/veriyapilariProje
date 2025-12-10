@@ -1,40 +1,34 @@
+/**
+* @file queue.hpp
+* @description bu sayfa kuyruk veri yapısı oluşturuyor her kuyruk elemani içinde dizi tutan bir 6 li ağaç tutuyor
+* @course 1A grubu ( mehmet fatih adak)
+* @assignment 2. Ödev
+* @date 07.12.2025
+* @author Adem batur , adem.batur@ogr.sakarya.edu.tr
+*/
 #ifndef QUEUE_HPP
 #define QUEUE_HPP
 
 #include "BSTlist.hpp"
-#include <iostream>
-using namespace std;
 
-struct NodeQueue{
-    BST* tree;
-    NodeQueue* next;
-    
-    NodeQueue(BST* tr , NodeQueue* nx);
-};
-
-class Queue{
+class Queue {
 private:
-    NodeQueue* front;
-    NodeQueue* back;
+    BST* trees[6];      // Sabit dizi - hizli erisim icin O(1)
     int length;
 
 public:
     Queue();
     ~Queue();
 
-    void enqueue(BST* tree);
-    //kökü döndürüyor
+    void enqueue(BST* tree); // ekle
+    BST* dequeue();           // ilk elemani cikar
+    BST* dequeuePriority();   // En yüksek height'li cikar
+
     int getFrontRoot();
-    //öncelikliyi döndürüyor
-    int getPriorityRoot();
+    int getPriorityRoot(); // oncelikli getir
     int getLength();
-
-     // indexe gore ağaç getiriyor.
-     BST* getTreeAtPosition(int startIndex); 
-    BST* getTreeAt(int index); 
-
-    
     bool isEmpty();
-    BST* getPriorityTree(); // oncelikliyi getiriyor
+    BST* getTreeAt(int index);
 };
+
 #endif

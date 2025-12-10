@@ -1,131 +1,113 @@
+/**
+* @file queue.cpp
+* @description bu sayfa queue classinin fonklarını dolduruyor
+* @course 1A grubu ( mehmet fatih adak)
+* @assignment 2. Ödev
+* @date 07.12.2025
+* @author Adem batur , adem.batur@ogr.sakarya.edu.tr
+*/
 #include "queue.hpp"
 
-NodeQueue::NodeQueue(BST* tr , NodeQueue* nx){
-    this->tree = tr;
-    this->next = nx;
-}
-
-Queue::Queue(){
-    front = back = NULL;
+//kuyruklari ilk basta bos olusturuyoruz
+Queue::Queue() {
+    for (int i = 0; i < 6; i++) {
+        trees[i] = NULL;
+    }
     length = 0;
 }
 
-Queue::~Queue(){
-    NodeQueue* current = front;
-    while(current != NULL){
-        NodeQueue* temp = current;
-        current = current->next;
-        delete temp->tree;
-        delete temp;
+Queue::~Queue() {
+    for (int i = 0; i < 6; i++) {
+        if (trees[i] != NULL) {
+            delete trees[i];
+        }
     }
 }
 
-void Queue::enqueue(BST* tree){
-    if(length >= 6){
+void Queue::enqueue(BST* tree) {
+    // olmaz ama olursa memory leak olmasin diye kontrol var
+    if (length >= 6) {
         delete tree;
         return;
     }
-        
-    NodeQueue* yeniNode = new NodeQueue(tree, NULL);
-    
-    if(front == NULL) {
-        front = back = yeniNode;
-    } else {
-        back->next = yeniNode;
-        back = yeniNode;
-    }
-    length++;    
+    trees[length] = tree;
+    length++;
 }
 
-int Queue::getFrontRoot(){
-    if(front == NULL) return -1;
-    
-    NodeQueue* ptr = front;
-    while(ptr != NULL){
-        if(ptr->tree->getRoot() != -1){
-            return ptr->tree->getRoot();
+BST* Queue::dequeue() {
+    if (length == 0) return NULL;
+
+    BST* cikan = trees[0];
+
+    // burda kuyrugun ilk elmanini cikartiyoruz ve kuyrugu kaydiriyoruz ( dizinin icinde)
+    for (int i = 0; i < length - 1; i++) {
+        trees[i] = trees[i + 1];
+    }
+    trees[length - 1] = NULL;
+    length--;
+
+    return cikan;
+}
+
+BST* Queue::dequeuePriority() {
+    if (length == 0) return NULL;
+
+    // En yüksek height'lı bul
+    int maxIdx = 0;
+    int maxHeight = trees[0]->getHeight();
+
+    for (int i = 1; i < length; i++) {
+        int h = trees[i]->getHeight();
+        if (h > maxHeight) {
+            maxHeight = h;
+            maxIdx = i;
         }
-        ptr = ptr->next;
     }
-    return -1;
+
+    BST* cikan = trees[maxIdx];
+
+    // burda oncelikliyi cikarttiktan  sonra kaydirma yapiyoruz
+    for (int i = maxIdx; i < length - 1; i++) {
+        trees[i] = trees[i + 1];
+    }
+    trees[length - 1] = NULL;
+    length--;
+
+    return cikan;
 }
 
-int Queue::getPriorityRoot(){
-    if(front == NULL) return -1;
-    
-    NodeQueue* ptr = front;
-    NodeQueue* maxNode = NULL;
-    int maxHeight = -1;
-    
-    while(ptr != NULL){
-        if(ptr->tree->getRoot() != -1){
-            int h = ptr->tree->getHeight();
-            if(h > maxHeight){
-                maxHeight = h;
-                maxNode = ptr;
-            }
+int Queue::getFrontRoot() {
+    if (length == 0) return -1;
+    return trees[0]->getRoot();
+}
+
+int Queue::getPriorityRoot() {
+    if (length == 0) return -1;
+
+    int maxIdx = 0;
+    int maxHeight = trees[0]->getHeight();
+
+    for (int i = 1; i < length; i++) {
+        int h = trees[i]->getHeight();
+        if (h > maxHeight) {
+            maxHeight = h;
+            maxIdx = i;
         }
-        ptr = ptr->next;
     }
-    
-    if(maxNode == NULL) return -1;
-    return maxNode->tree->getRoot();
+
+    return trees[maxIdx]->getRoot();
 }
 
-int Queue::getLength(){
+int Queue::getLength() {
     return length;
 }
 
-BST* Queue::getTreeAt(int index){
-    if(front == NULL || index < 0) return NULL;
-    
-    NodeQueue* ptr = front;
-    int i = 0;
-    
-    while(ptr != NULL && i < index){
-        ptr = ptr->next;
-        i++;
-    }
-    
-    if(ptr == NULL) return NULL;
-    return ptr->tree;
+// istedigim indeksteki agaci getir
+BST* Queue::getTreeAt(int index) {
+    if (index < 0 || index >= length) return NULL;
+    return trees[index];
 }
 
-bool Queue::isEmpty(){
-    return (front == NULL);
-}
-
-BST* Queue::getPriorityTree(){
-    if(front == NULL) return NULL;
-    
-    NodeQueue* ptr = front;
-    NodeQueue* maxNode = NULL;
-    int maxHeight = -1;
-    
-    while(ptr != NULL){
-        if(ptr->tree->getRoot() != -1){
-            int h = ptr->tree->getHeight();
-            if(h > maxHeight){
-                maxHeight = h;
-                maxNode = ptr;
-            }
-        }
-        ptr = ptr->next;
-    }
-    
-    if(maxNode == NULL) return NULL;
-    return maxNode->tree;
-}
-
-BST* Queue::getTreeAtPosition(int startIndex){
-    if(front == NULL || length == 0) return NULL;
-    
-    for(int i = 0; i < length; i++){
-        int index = (startIndex + i) % length;
-        BST* tree = getTreeAt(index);
-        if(tree != NULL && tree->getRoot() != -1){
-            return tree;
-        }
-    }
-    return NULL;
+bool Queue::isEmpty() {
+    return (length == 0);
 }

@@ -1,120 +1,61 @@
+/**
+* @file queueControl.cpp
+* @description bu sayfa queueControl classinin fonklarini dolduruyor
+* @course 1A grubu ( mehmet fatih adak)
+* @assignment 2. Ödev
+* @date 07.12.2025
+* @author Adem batur , adem.batur@ogr.sakarya.edu.tr
+*/
 #include "queueControl.hpp"
-#include <cmath>  // ceil için
+#include <cmath>
 #include <iostream>
+using namespace std;
 
-HexagonNode::HexagonNode(){
-    this->veri = Queue();
+HexagonNode::HexagonNode() {
     this->next = NULL;
 }
 
-queueControl::queueControl(int hexagonCount){
+queueControl::queueControl(int hexagonCount) {
     this->totalHexagons = hexagonCount;
-    this->rowCount = ceil(hexagonCount / 6.0); // dizinin satır sayısı , sütün abit 6.
+    this->rowCount = (int)ceil(hexagonCount / 6.0);
 
-    this-> grid = new int*[rowCount];
-    for(int i = 0; i < rowCount ; i++){
+    // Grid olustur
+    this->grid = new int*[rowCount];
+    for (int i = 0; i < rowCount; i++) {
         grid[i] = new int[6];
-        
-        for(int j = 0; j< 6 ; j++){
+        for (int j = 0; j < 6; j++) {
             grid[i][j] = 0;
         }
     }
 
-    // altıgen sayısı kadar altıgen oluşturuyoruz
+    // Hizli erisim dizisi
+    this->hexArray = new HexagonNode*[hexagonCount];
+
+    // Altigen listesi olustur
     this->head = new HexagonNode();
+    hexArray[0] = head;
+
     HexagonNode* ptr = head;
-    for(int i=1 ; i< hexagonCount ; i++){
+    for (int i = 1; i < hexagonCount; i++) {
         ptr->next = new HexagonNode();
         ptr = ptr->next;
+        hexArray[i] = ptr;
     }
-    ptr->next = head; // son node heada döndü. dairesel liste.
+    ptr->next = head;  // Dairesel
 
     printGrid();
 }
 
-
-void queueControl::printGrid(){
-    system("cls"); 
-    
-    int count = 0;
-    for(int i = 0; i < rowCount; i++){
-        for(int j = 0; j < 6 && count < totalHexagons; j++){
-            cout << grid[i][j] << "\t";
-            count++;
-        }
-        cout << endl;
-    }
-}
-
-void queueControl::initializeFromFile(const std::string& dosyaAdi){
-    std::ifstream file(dosyaAdi); 
-
-    if (!file.is_open()) {
-        std::cerr << "HATA: dosya acilamadi!\n";
-        return;
-    }
-
-    std::string line;
-    int satirSayaci = 0;
-    HexagonNode* aktifAltigen = head;
-
-    while(std::getline(file, line)){
-        // yeni bst olustur
-        BST* agac = new BST();
-
-        // Satırdaki sayıları ayir ve ağaca ekle
-        int sayi = 0;
-        bool sayiVar = false;
-        
-        // burda manuel olarak satırları bölüp ağaça
-        for(int i = 0; i <= line.length(); i++) {
-            char c;
-            if(i < line.length()) {
-                c = line[i];
-            } else {
-                c = ' ';  // satır sonu
-            }
-            
-            if(c >= '0' && c <= '9') {
-                sayi = sayi * 10 + (c - '0');
-                sayiVar = true;
-            } 
-            else if(sayiVar) {
-                agac->add(sayi);
-                sayi = 0;
-                sayiVar = false;
-            }
-        }
-        // 3. BST'yi aktif altıgenin kuyruğuna ekle
-        aktifAltigen->veri.enqueue(agac);
-        
-        // 4. Satır sayacını artır
-        satirSayaci++;
-        
-        // 5. 6 satır olduysa sonraki altıgene geç
-        if(satirSayaci == 6) {
-            satirSayaci = 0;
-            aktifAltigen = aktifAltigen->next;
-        }
-    }
-    file.close();
-    updateGrid();      // değerleri hesapla
-    printGrid();   // ekrana bas
-}
-
-
-
-queueControl::~queueControl(){
-    // 1. Grid'i sil
-    for(int i = 0; i < rowCount; i++){
+queueControl::~queueControl() {
+    for (int i = 0; i < rowCount; i++) {
         delete[] grid[i];
     }
     delete[] grid;
-    
-    // 2. Altıgen listesini sil (dairesel liste)
-    if(head != NULL){
+    delete[] hexArray;
+
+    if (head != NULL) {
         HexagonNode* current = head->next;
-        while(current != head){
+        while (current != head) {
             HexagonNode* temp = current;
             current = current->next;
             delete temp;
@@ -123,97 +64,188 @@ queueControl::~queueControl(){
     }
 }
 
+void queueControl::printGrid() {
+    system("cls");
 
-
-void queueControl::updateGrid(){
-    HexagonNode* ptr = head;
     int count = 0;
-    
-    for(int i = 0; i < rowCount; i++){
-        for(int j = 0; j < 6 && count < totalHexagons; j++){
-            
-            int normalRoot = ptr->veri.getFrontRoot();
-            int priorityRoot = ptr->veri.getPriorityRoot();
-            
-            if(priorityRoot <= 0 || normalRoot < 0){
-                grid[i][j] = 0;
-            } else {
-                grid[i][j] = normalRoot / priorityRoot;
-            }
-            
-            ptr = ptr->next;
-            count++;
+    for (int i = 0; i < rowCount; i++) {
+        // Bu satirdaki altigen sayisi
+        int colsInRow = 6;
+        if ((i + 1) * 6 > totalHexagons) {
+            colsInRow = totalHexagons - i * 6;
         }
-    }
-}
-
-
-
-void queueControl::printGridWithTour(int tourNum){
-    system("cls"); 
-    
-    cout <<"TUR "<<tourNum<<endl;
-    
-    int count = 0;
-    for(int i = 0; i < rowCount; i++){
-        for(int j = 0; j < 6 && count < totalHexagons; j++){
-            cout << grid[i][j] << "\t";
-            count++;
+        
+        if (i % 2 == 0) {
+            // Cift satirlar (0, 2, 4...) normal yazdir
+            for (int j = 0; j < colsInRow; j++) {
+                cout << grid[i][j] << "\t";
+            }
+        } else {
+            // Tek satirlar (1, 3, 5...) tersten yazdir
+            for (int j = colsInRow - 1; j >= 0; j--) {
+                cout << grid[i][j] << "\t";
+            }
         }
         cout << endl;
+        count += colsInRow;
     }
 }
 
-void queueControl::runTours(int tourCount){
-    int normalSayac = 0;
+void queueControl::printGridWithTour(int tourNum) {
+    // imleci sol ust koseye tasir ve ustune yazar . hiz icin
+     system("cls");
     
-    for(int tur = 1; tur <= tourCount; tur++){
-        bool isPriority = (tur % 2 == 0);
-        HexagonNode* current = head;
+    cout << "TUR " << tourNum << endl;
+
+    for (int i = 0; i < rowCount; i++) {
+        int colsInRow = 6;
+        if ((i + 1) * 6 > totalHexagons) {
+            colsInRow = totalHexagons - i * 6;
+        }
         
-        for(int h = 0; h < totalHexagons; h++){
-            BST* agac;
-            if(isPriority){
-                agac = current->veri.getPriorityTree();
+        if (i % 2 == 0) {
+            for (int j = 0; j < colsInRow; j++) {
+                cout << grid[i][j] << "\t";
+            }
+        } else {
+            for (int j = colsInRow - 1; j >= 0; j--) {
+                cout << grid[i][j] << "\t";
+            }
+        }
+        cout << "     " << endl;
+    }
+    cout.flush();
+}
+
+void queueControl::initializeFromFile(const std::string& dosyaAdi) {
+    std::ifstream file(dosyaAdi);
+    if (!file.is_open()) {
+        std::cerr << "HATA: dosya acilamadi!\n";
+        return;
+    }
+
+    std::string line;
+    int satirSayaci = 0;
+    int altigenIndex = 0;
+
+    while (std::getline(file, line) && altigenIndex < totalHexagons) {
+        BST* agac = new BST();
+
+        int sayi = 0;
+        bool sayiVar = false;
+
+        for (int i = 0; i <= (int)line.length(); i++) {
+            char c = (i < (int)line.length()) ? line[i] : ' ';
+
+            if (c >= '0' && c <= '9') {
+                sayi = sayi * 10 + (c - '0');
+                sayiVar = true;
+            } else if (sayiVar) {
+                agac->add(sayi);
+                sayi = 0;
+                sayiVar = false;
+            }
+        }
+
+        hexArray[altigenIndex]->veri.enqueue(agac);
+        satirSayaci++;
+
+        if (satirSayaci == 6) {
+            satirSayaci = 0;
+            altigenIndex++;
+        }
+    }
+
+    file.close();
+    updateGrid();
+    printGrid();
+}
+
+void queueControl::updateSingleHexagon(int index) {
+    int row = index / 6;
+    int col = index % 6;
+
+    int frontRoot = hexArray[index]->veri.getFrontRoot();
+    int priorityRoot = hexArray[index]->veri.getPriorityRoot();
+
+    //eger ki oncelikli yoksa veya frontroot yoksa sifir basar ki bu olmayacak bir durum ama kontrol olmasi gerek
+    if (priorityRoot <= 0 || frontRoot < 0) {
+        grid[row][col] = 0;
+    } else {
+        grid[row][col] = frontRoot / priorityRoot;
+    }
+}
+
+void queueControl::updateGrid() {
+    for (int i = 0; i < totalHexagons; i++) {
+        updateSingleHexagon(i);
+    }
+}
+
+
+void queueControl::runTours(int tourCount) {
+    // Turlara baslamadan once ekrani temizle
+    system("cls");
+    
+    for (int tur = 1; tur <= tourCount; tur++) {
+        bool isPriority = (tur % 2 == 0); // oncelikli mi cikacak
+
+        for (int h = 0; h < totalHexagons; h++) {
+            BST* cikanAgac;
+            if (isPriority) {
+                cikanAgac = hexArray[h]->veri.dequeuePriority();
             } else {
-                agac = current->veri.getTreeAtPosition(normalSayac);
+                cikanAgac = hexArray[h]->veri.dequeue();
             }
-            
-            if(agac != NULL && agac->getRoot() != -1){
-                // Dinamik dizi - node sayısı kadar
-                int nodeCount = agac->getNodeCount();
-                int* arr = new int[nodeCount];  // DİNAMİK
-                int size = 0;
-                
-                agac->postorderGetAndDelete(arr, size);
-                
-                HexagonNode* hedef = current->next;
-                int hedefUzunluk = hedef->veri.getLength();
-                
-                if(hedefUzunluk > 0 && size > 0){
-                    int treeIndex = 0;
-                    for(int i = 0; i < size; i++){
-                        BST* hedefAgac = hedef->veri.getTreeAt(treeIndex);
-                        if(hedefAgac != NULL){
-                            hedefAgac->add(arr[i]);
-                        }
-                        treeIndex = (treeIndex + 1) % hedefUzunluk;
-                    }
+
+            if (cikanAgac == NULL) continue;
+
+            int nodeCount = cikanAgac->getNodeCount();
+            if (nodeCount == 0) {
+                delete cikanAgac;
+                continue;
+            }
+
+            int* arr = new int[nodeCount];
+            int size = 0;
+            cikanAgac->postorderGetAndDelete(arr, size);
+            delete cikanAgac;
+
+            int hedefIndex = (h + 1) % totalHexagons;
+            Queue& hedefKuyruk = hexArray[hedefIndex]->veri;
+
+            int treeIndex = 0; // Her transferde dagitmaya en bastan (0. agactan) basla
+            for (int i = 0; i < size; i++) {
+
+                int mevcutUzunluk = hedefKuyruk.getLength();
+
+                // Eger treeIndex mevcut agac sayısından kucukse, o agaca ekle
+                if (treeIndex < mevcutUzunluk) {
+                    hedefKuyruk.getTreeAt(treeIndex)->add(arr[i]);
+                    treeIndex++;
                 }
-                
-                delete[] arr;  // TEMİZLE
+                // Eger treeIndex sınıra geldiyse ve kuyrukta hala yer varsa ( < 6 )
+                // Yeni agac olustur ve ona ekle
+                else if (mevcutUzunluk < 6) {
+                    BST* yeniAgac = new BST();
+                    yeniAgac->add(arr[i]);
+                    hedefKuyruk.enqueue(yeniAgac);
+                    treeIndex++; // Yeni olusturulana ekledik, sonraki sayı bir sonrakine gidecek
+                }
+                // Eger 6 agac dolduysa ve sona geldiysek, basa don (treeIndex >= 6)
+                else {
+                    treeIndex = 0; // Basa dön
+                    hedefKuyruk.getTreeAt(treeIndex)->add(arr[i]);
+                    treeIndex++; // Bir sonraki sayı 1. agaca gitsin diye artır
+                }
             }
-            current = current->next;
+
+            delete[] arr;
         }
-        
-        if(!isPriority){
-            normalSayac = (normalSayac + 1) % 6;
-        }
-        
+
         updateGrid();
         printGridWithTour(tur);
-
     }
-    
+
     cout << endl << "Turlar tamamlandi." << endl;
 }
