@@ -13,6 +13,7 @@
 using namespace std;
 
 int main() {
+    system("cls"); // baslayinca ekranda ne varsa silsin.
     ifstream file("data.txt");
     int totalLines = 0;
 

@@ -9,6 +9,7 @@
 #include "queueControl.hpp"
 #include <cmath>
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 HexagonNode::HexagonNode() {
@@ -66,36 +67,35 @@ queueControl::~queueControl() {
 
 void queueControl::printGrid() {
     system("cls");
-
-    int count = 0;
+    
+    stringstream ss;
     for (int i = 0; i < rowCount; i++) {
-        // Bu satirdaki altigen sayisi
         int colsInRow = 6;
         if ((i + 1) * 6 > totalHexagons) {
             colsInRow = totalHexagons - i * 6;
         }
         
         if (i % 2 == 0) {
-            // Cift satirlar (0, 2, 4...) normal yazdir
             for (int j = 0; j < colsInRow; j++) {
-                cout << grid[i][j] << "\t";
+                ss << grid[i][j] << "\t";
             }
         } else {
-            // Tek satirlar (1, 3, 5...) tersten yazdir
             for (int j = colsInRow - 1; j >= 0; j--) {
-                cout << grid[i][j] << "\t";
+                ss << grid[i][j] << "\t";
             }
         }
-        cout << endl;
-        count += colsInRow;
+        ss << "\n";
     }
+    
+    cout << ss.str();
+    cout.flush();
 }
 
 void queueControl::printGridWithTour(int tourNum) {
-    // imleci sol ust koseye tasir ve ustune yazar . hiz icin
-     system("cls");
+    system("cls");
     
-    cout << "TUR " << tourNum << endl;
+    stringstream ss;
+    ss << "TUR " << tourNum << "\n";
 
     for (int i = 0; i < rowCount; i++) {
         int colsInRow = 6;
@@ -105,15 +105,17 @@ void queueControl::printGridWithTour(int tourNum) {
         
         if (i % 2 == 0) {
             for (int j = 0; j < colsInRow; j++) {
-                cout << grid[i][j] << "\t";
+                ss << grid[i][j] << "\t";
             }
         } else {
             for (int j = colsInRow - 1; j >= 0; j--) {
-                cout << grid[i][j] << "\t";
+                ss << grid[i][j] << "\t";
             }
         }
-        cout << "     " << endl;
+        ss << "\n";
     }
+    
+    cout << ss.str();
     cout.flush();
 }
 
@@ -168,7 +170,6 @@ void queueControl::updateSingleHexagon(int index) {
     int frontRoot = hexArray[index]->veri.getFrontRoot();
     int priorityRoot = hexArray[index]->veri.getPriorityRoot();
 
-    //eger ki oncelikli yoksa veya frontroot yoksa sifir basar ki bu olmayacak bir durum ama kontrol olmasi gerek
     if (priorityRoot <= 0 || frontRoot < 0) {
         grid[row][col] = 0;
     } else {
@@ -184,11 +185,8 @@ void queueControl::updateGrid() {
 
 
 void queueControl::runTours(int tourCount) {
-    // cls yerine ustune yazmayi tercih ettim. daha hizli 
-    cout << "\033[2J\033[H"; 
-    
     for (int tur = 1; tur <= tourCount; tur++) {
-        bool isPriority = (tur % 2 == 0); // oncelikli mi cikacak
+        bool isPriority = (tur % 2 == 0);
 
         for (int h = 0; h < totalHexagons; h++) {
             BST* cikanAgac;
@@ -209,14 +207,11 @@ void queueControl::runTours(int tourCount) {
             int* arr = new int[nodeCount];
             int size = 0;
             cikanAgac->postorderGetAndDelete(arr, size);
-            delete cikanAgac;   // alinan agac sonra siliniyor
+            delete cikanAgac;
 
             int hedefIndex = (h + 1) % totalHexagons;
             Queue& hedefKuyruk = hexArray[hedefIndex]->veri;
 
-
-
-//! burda cok onemli bir islem var. eger kuyruk 4 elemanli ise 4 e kadar ekliyor sonra 5 i sonra 6 yi olusturup onlarada ekliyor sonra tekrar basa donuyor
             QueueNode* currentNode = hedefKuyruk.getHead();
             int mevcutUzunluk = hedefKuyruk.getLength();
             int treeIndex = 0;
@@ -250,5 +245,5 @@ void queueControl::runTours(int tourCount) {
         printGridWithTour(tur);
     }
 
-    cout << endl << "Turlar tamamlandi." << endl;
+    cout << "\nTurlar tamamlandi." << endl;
 }
