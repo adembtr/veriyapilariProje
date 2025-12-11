@@ -8,20 +8,36 @@
 */
 #include "queue.hpp"
 
+QueueNode::QueueNode(BST* t) {
+    tree = t;
+    next = NULL;
+}
+
 //kuyruklari ilk basta bos olusturuyoruz
 Queue::Queue() {
-    for (int i = 0; i < 6; i++) {
-        trees[i] = NULL;
-    }
+    head = NULL;
+    tail = NULL;
     length = 0;
 }
 
+
+
+
 Queue::~Queue() {
-    for (int i = 0; i < 6; i++) {
-        if (trees[i] != NULL) {
-            delete trees[i];
-        }
+    if(head == NULL) return;
+
+    QueueNode* current = head;
+
+    while(current != tail){
+        QueueNode* del = current;
+        current = current->next;
+        delete del->tree;
+        delete del;
     }
+    delete current->tree;
+    delete current;
+    head = tail = NULL;
+    length = 0;
 }
 
 void Queue::enqueue(BST* tree) {
@@ -30,82 +46,108 @@ void Queue::enqueue(BST* tree) {
         delete tree;
         return;
     }
-    trees[length] = tree;
+
+    QueueNode* newNode = new QueueNode(tree);
+    if (head == NULL) {
+        head = newNode;
+        tail = newNode;
+        newNode->next = head; // kendine bagla (dairesel)
+    } else {
+        tail->next = newNode;
+        newNode->next = head; // dairesel bagla
+        tail = newNode;         //yeni eklenen son yap
+    }
     length++;
 }
 
 BST* Queue::dequeue() {
     if (length == 0) return NULL;
 
-    BST* cikan = trees[0];
+    QueueNode* temp = head;
+    BST* cikan = temp->tree;
 
-    // burda kuyrugun ilk elmanini cikartiyoruz ve kuyrugu kaydiriyoruz ( dizinin icinde)
-    for (int i = 0; i < length - 1; i++) {
-        trees[i] = trees[i + 1];
+    if (length == 1) {
+        head = NULL;
+        tail = NULL;
+    } else {
+        head = head->next;
+        tail->next = head; // dairesel baglantiyi koru
     }
-    trees[length - 1] = NULL;
+    
+    delete temp;
     length--;
-
-    return cikan;
+    return cikan;      //bu gonderilen agac queueControl da silinyor
 }
 
 BST* Queue::dequeuePriority() {
     if (length == 0) return NULL;
 
-    // En yüksek height'lı bul
-    int maxIdx = 0;
-    int maxHeight = trees[0]->getHeight();
+    // En yuksek height'li dugumu ve oncesini bul ( simdilik head sayiyoruz)
+    QueueNode* maxNode = head;
+    QueueNode* maxPrev = tail;
+    int maxHeight = head->tree->getHeight();
 
-    for (int i = 1; i < length; i++) {
-        int h = trees[i]->getHeight();
+
+    //  prev ve current kullanarak adim adim gezip en yuksek oncelikli olani buluyoruz
+    QueueNode* prev = head;
+    QueueNode* current = head->next;
+    while (current != head) {
+        int h = current->tree->getHeight();
         if (h > maxHeight) {
             maxHeight = h;
-            maxIdx = i;
+            maxNode = current;
+            maxPrev = prev;
         }
+        prev = current;
+        current = current->next;
     }
 
-    BST* cikan = trees[maxIdx];
 
-    // burda oncelikliyi cikarttiktan  sonra kaydirma yapiyoruz
-    for (int i = maxIdx; i < length - 1; i++) {
-        trees[i] = trees[i + 1];
+    // burda oncelikli cikanin agacini alip onu siliyoruz
+    BST* cikan = maxNode->tree;
+    if (length == 1) { // eger 1 agac tek varsa ve onu siliyorsak bu calisir 
+        head = tail = NULL;
+    } else {
+        maxPrev->next = maxNode->next;
+        if (maxNode == head)  head = maxNode->next;
+        if (maxNode == tail)  tail = maxPrev;
     }
-    trees[length - 1] = NULL;
+    
+    delete maxNode;
     length--;
-
     return cikan;
 }
 
 int Queue::getFrontRoot() {
     if (length == 0) return -1;
-    return trees[0]->getRoot();
+    return head->tree->getRoot();
 }
 
 int Queue::getPriorityRoot() {
     if (length == 0) return -1;
-
-    int maxIdx = 0;
-    int maxHeight = trees[0]->getHeight();
-
-    for (int i = 1; i < length; i++) {
-        int h = trees[i]->getHeight();
+    
+    QueueNode* maxNode = head;
+    int maxHeight = head->tree->getHeight();
+    
+    QueueNode* current = head->next;
+    while (current != head) {
+        int h = current->tree->getHeight();
         if (h > maxHeight) {
             maxHeight = h;
-            maxIdx = i;
+            maxNode = current;
         }
+        current = current->next;
     }
-
-    return trees[maxIdx]->getRoot();
+    
+    return maxNode->tree->getRoot();
 }
 
 int Queue::getLength() {
     return length;
 }
 
-// istedigim indeksteki agaci getir
-BST* Queue::getTreeAt(int index) {
-    if (index < 0 || index >= length) return NULL;
-    return trees[index];
+QueueNode* Queue::getHead() {
+       return head;
 }
 
 bool Queue::isEmpty() {

@@ -12,6 +12,22 @@ bu şekilde yazdırmışsınız yani bir yılan gibi 63 ün altıgenindeki ağac
 lütfen çıktıları karşılaştırırken bunları da göz önünde bulundurursanız memnun olurum hocam , saygılarımla adem batur..
 
 
+
+
+
+
+
 ******* ÖNEMLİ 2 *******
 data da eğer 0 elemanı varsa bazen öncelikilinin kökü 0 oluyor ve sıfıra BÖLME HATASI veriyor bende bununla karşılaşmaamk için 0 a blünen yerlerde hata vermek yerine ekranda 0 yazdım.
 bilginize sunarım hocam. 
+
+
+
+
+
+
+
+
+
+******* ÖNEMLİ 3 *******
+data txt make filenin yanında olmalı ki okuyabilsin yoksa okuyamaz

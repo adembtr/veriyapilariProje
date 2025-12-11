@@ -184,8 +184,8 @@ void queueControl::updateGrid() {
 
 
 void queueControl::runTours(int tourCount) {
-    // Turlara baslamadan once ekrani temizle
-    system("cls");
+    // cls yerine ustune yazmayi tercih ettim. daha hizli 
+    cout << "\033[2J\033[H"; 
     
     for (int tur = 1; tur <= tourCount; tur++) {
         bool isPriority = (tur % 2 == 0); // oncelikli mi cikacak
@@ -209,34 +209,37 @@ void queueControl::runTours(int tourCount) {
             int* arr = new int[nodeCount];
             int size = 0;
             cikanAgac->postorderGetAndDelete(arr, size);
-            delete cikanAgac;
+            delete cikanAgac;   // alinan agac sonra siliniyor
 
             int hedefIndex = (h + 1) % totalHexagons;
             Queue& hedefKuyruk = hexArray[hedefIndex]->veri;
 
-            int treeIndex = 0; // Her transferde dagitmaya en bastan (0. agactan) basla
+
+
+//! burda cok onemli bir islem var. eger kuyruk 4 elemanli ise 4 e kadar ekliyor sonra 5 i sonra 6 yi olusturup onlarada ekliyor sonra tekrar basa donuyor
+            QueueNode* currentNode = hedefKuyruk.getHead();
+            int mevcutUzunluk = hedefKuyruk.getLength();
+            int treeIndex = 0;
+            
             for (int i = 0; i < size; i++) {
-
-                int mevcutUzunluk = hedefKuyruk.getLength();
-
-                // Eger treeIndex mevcut agac sayısından kucukse, o agaca ekle
                 if (treeIndex < mevcutUzunluk) {
-                    hedefKuyruk.getTreeAt(treeIndex)->add(arr[i]);
+                    currentNode->tree->add(arr[i]);
+                    currentNode = currentNode->next;
                     treeIndex++;
                 }
-                // Eger treeIndex sınıra geldiyse ve kuyrukta hala yer varsa ( < 6 )
-                // Yeni agac olustur ve ona ekle
                 else if (mevcutUzunluk < 6) {
                     BST* yeniAgac = new BST();
                     yeniAgac->add(arr[i]);
                     hedefKuyruk.enqueue(yeniAgac);
-                    treeIndex++; // Yeni olusturulana ekledik, sonraki sayı bir sonrakine gidecek
+                    mevcutUzunluk++;
+                    treeIndex++;
                 }
-                // Eger 6 agac dolduysa ve sona geldiysek, basa don (treeIndex >= 6)
                 else {
-                    treeIndex = 0; // Basa dön
-                    hedefKuyruk.getTreeAt(treeIndex)->add(arr[i]);
-                    treeIndex++; // Bir sonraki sayı 1. agaca gitsin diye artır
+                    treeIndex = 0;
+                    currentNode = hedefKuyruk.getHead();
+                    currentNode->tree->add(arr[i]);
+                    currentNode = currentNode->next;
+                    treeIndex++;
                 }
             }
 

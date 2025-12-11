@@ -32,13 +32,13 @@ int main() {
     queueControl* listePtr = new queueControl(altigenSayisi);
 
     cout << "Toplam altigen sayisi: " << altigenSayisi << endl;
-    cout << "Devam etmek icin ENTER'a basin...";
+    cout << "altigenleri doldurmak icin ENTER'a basin...";
     cin.get();
 
     listePtr->initializeFromFile("data.txt");
 
     int turSayisi;
-    cout << endl << "Kac tur calistirilacak? ";
+    cout << endl << "Kac tur calistirilacagini girin ? ";
     cin >> turSayisi;
     cin.ignore();
 

@@ -11,9 +11,17 @@
 
 #include "BSTlist.hpp"
 
+// Kuyruk dugumu - dairesel linked list icin
+struct QueueNode {
+    BST* tree;
+    QueueNode* next;
+    QueueNode(BST* t = NULL);
+};
+
 class Queue {
 private:
-    BST* trees[6];      // Sabit dizi - hizli erisim icin O(1)
+    QueueNode* head;    // Dairesel linked list - ilk eleman
+    QueueNode* tail;    // Son eleman (head'den onceki)
     int length;
 
 public:
@@ -28,7 +36,7 @@ public:
     int getPriorityRoot(); // oncelikli getir
     int getLength();
     bool isEmpty();
-    BST* getTreeAt(int index);
+    QueueNode* getHead();  // headi getir tur icin
 };
 
 #endif
